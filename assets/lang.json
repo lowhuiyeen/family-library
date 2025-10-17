@@ -1,0 +1,9 @@
+{
+  "title": { "zh": "小金库图书馆", "en": "Little Treasury Library", "jp": "小さな宝の図書館" },
+  "footer_name": { "zh": "罗·二哈·卉云", "en": "Low·The Second·HuiYeen", "jp": "罗·二哈·卉云" },
+  "add_book": { "zh": "新增 / 修改书籍", "en": "Add / Edit Book", "jp": "本を追加 / 編集" },
+  "status_all": { "zh": "全部状态", "en": "All Status", "jp": "すべての状態" },
+  "status_avail": { "zh": "可借阅", "en": "Available", "jp": "貸出可" },
+  "status_borrowed": { "zh": "已被借阅", "en": "Borrowed", "jp": "貸出中" },
+  "search_placeholder": { "zh": "搜索书名 / 作者 / 书号", "en": "Search title / author / code", "jp": "書名 / 著者 / コードを検索" }
+}

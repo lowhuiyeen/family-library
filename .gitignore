@@ -1,34 +1,18 @@
-# =========================================
-# 🧹 GITIGNORE — Family Library Website
-# =========================================
-
-# Node / Netlify build files
 node_modules/
-.netlify/
 dist/
-build/
-functions/
+.env
+
+# Firebase local config (keep private)
+assets/firebase-config.js
+
+# IDE
+.vscode/
+family-library.code-workspace
+
+# Data backups
+*.json
+!assets/lang.json
+
+# OS junk
 .DS_Store
 Thumbs.db
-
-# System / IDE files
-*.code-workspace
-.vscode/
-.idea/
-*.log
-*.tmp
-
-# Environment and secrets
-.env
-.env.local
-.env.development.local
-.env.production.local
-
-# Archives or uploads
-*.zip
-*.tar
-*.gz
-
-# Optional local test folders
-test/
-sandbox/

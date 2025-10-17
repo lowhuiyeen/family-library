@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新增 / 修改书籍</title>
+  <link rel="icon" href="assets/favicon.ico">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header></header>
+<main class="wrap">
+  <div class="form-card">
+    <h2>🛠 新增 / 修改书籍</h2>
+    <div class="form-grid two">
+      <div><label>书号*</label><input id="code" readonly></div>
+      <div><label>ISBN书号</label><input id="isbn"></div>
+    </div>
+    <label>书名*</label><input id="title">
+    <div class="form-grid two"><div><label>作者</label><input id="author"></div><div><label>系列名</label><input id="series"></div></div>
+    <div class="form-grid two"><div><label>借阅状况</label><input id="status" placeholder="可借阅 / 已被借阅"></div><div><label>借阅人</label><input id="borrower"></div></div>
+    <label>Google 搜索链接</label><input id="googleLink" readonly>
+    <div class="actions"><button class="primary" id="save">保存</button><button id="load">读取</button><button class="danger" id="del">删除</button></div>
+    <p id="msg" class="form-note"></p><p class="form-note"><a href="library.html">← 返回馆藏</a></p>
+  </div>
+</main>
+<footer></footer>
+<script src="assets/load-layout.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+  import { getDatabase, ref, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+  import { firebaseConfig } from "./assets/firebase-config.js";
+  const app=initializeApp(firebaseConfig); const db=getDatabase(app);
+  const e=id=>document.getElementById(id); const msg=e("msg");
+  const bookParam=new URL(location.href).searchParams.get("book");
+  async function genId(){
+    const s=await get(ref(db,"Books书籍")); if(!s.exists())return"BK0001";
+    const list=Object.keys(s.val()); const last=list.sort().pop();
+    const num=parseInt(last.replace("BK",""))+1; return "BK"+String(num).padStart(4,"0");
+  }
+  document.addEventListener("DOMContentLoaded",async()=>{ e("code").value=bookParam||await genId(); });
+  e("save").onclick=async()=>{
+    const code=e("code").value.trim(), title=e("title").value.trim(); if(!title)return msg.textContent="请填写书名";
+    const isbn=e("isbn").value.trim();
+    const google=isbn?`https://www.google.com/search?q=${isbn}`:`https://www.google.com/search?q=${encodeURIComponent(title)}`;
+    await set(ref(db,`Books书籍/${code}`),{
+      ISBN书号:isbn,书名:title,作者:e("author").value,系列名:e("series").value,
+      借阅状况:e("status").value||"可借阅",借阅人:e("borrower").value||"",googleLink:google
+    });
+    e("googleLink").value=google; msg.textContent="✅ 已保存";
+  };
+  e("load").onclick=async()=>{
+    const code=e("code").value.trim(); const s=await get(ref(db,`Books书籍/${code}`));
+    if(!s.exists())return msg.textContent="未找到"; const b=s.val();
+    for(const k of ["isbn","title","author","series","status","borrower","googleLink"]){ const el=e(k); if(el) el.value=b[el.id==="isbn"?"ISBN书号":el.id]||""; }
+    msg.textContent="✅ 已读取";
+  };
+  e("del").onclick=async()=>{ if(!confirm("确定删除?"))return; await remove(ref(db,`Books书籍/${e("code").value}`)); msg.textContent="🗑 已删除"; };
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>登录 小金库图书馆 | Family Library Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-app center">
+  <section class="card narrow">
+    <h2>🔐 登录 小金库图书馆</h2>
+
+    <input
+      type="email"
+      id="email"
+      placeholder="📧 邮箱 Email"
+      autofocus
+    />
+    <input
+      type="password"
+      id="password"
+      placeholder="🔑 密码 Password"
+    />
+
+    <button class="btn-primary" id="login-btn">登录 / Login</button>
+    <p id="msg" class="error"></p>
+  </section>
+
+  <script type="module">
+    import { app } from "./firebase-config.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const auth = getAuth(app);
+    const msg = document.getElementById("msg");
+    const btn = document.getElementById("login-btn");
+
+    async function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!email || !password) {
+        msg.textContent =
+          "⚠️ 请输入邮箱和密码 / Please enter both email and password";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "⏳ 登录中 ...";
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "app.html";
+      } catch (e) {
+        msg.textContent = "❌ 登录失败 / Login failed: " + e.message;
+        btn.disabled = false;
+        btn.textContent = "登录 / Login";
+      }
+    }
+
+    document.getElementById("login-btn").addEventListener("click", login);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
+
+    // Auto-redirect if already logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = "app.html";
+    });
+  </script>
+</body>
+</html>
