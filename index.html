@@ -1,26 +1,27 @@
-<!DOCTYPE html>
-<html lang="zh">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>小金库图书馆 | Hui Yeen Family Library</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="assets/icons/whatsapp.svg">
+  <link rel="stylesheet" href="assets/style.css">
 </head>
+<body>
+<header></header>
 
-<body class="bg-app center">
+<main class="wrap center">
   <section class="hero">
-    <img
-      src="images/library-cover.jpg"
-      alt="Family Library"
-      class="hero-img"
-    />
-    <h1>📚 小金库图书馆</h1>
-    <p>家庭专属图书管理系统<br />Private Family Library System</p>
-    <a href="login.html" class="btn-primary">🔐 登录 / Login</a>
+    <img src="images/library-cover.jpg" alt="Family Library" class="hero-img" />
+    <h1 data-i18n="title">小金库图书馆</h1>
+    <p data-i18n="hero_sub">家庭专属图书管理系统</p>
+    <a href="login.html" class="primary button" style="display:inline-block;padding:10px 18px;border-radius:12px;border:1px solid #3478f6;background:#1a3c80;color:#e8eeff;text-decoration:none;">
+      <span data-i18n="login_btn">登录 / Login</span>
+    </a>
   </section>
+</main>
 
-  <footer>
-    <p>© 2025 Hui Yeen Family Library · Private Use Only</p>
-  </footer>
+<footer></footer>
+<script src="assets/load-layout.js"></script>
 </body>
 </html>

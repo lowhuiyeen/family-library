@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>新增 / 修改书籍</title>
-  <link rel="icon" href="assets/favicon.ico">
+  <link rel="icon" href="assets/icons/whatsapp.svg">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -28,34 +28,49 @@
 <script src="assets/load-layout.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-  import { getDatabase, ref, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+  import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
   import { firebaseConfig } from "./assets/firebase-config.js";
   const app=initializeApp(firebaseConfig); const db=getDatabase(app);
-  const e=id=>document.getElementById(id); const msg=e("msg");
+  const e=id=>document.getElementById(id), msg=e("msg");
   const bookParam=new URL(location.href).searchParams.get("book");
   async function genId(){
-    const s=await get(ref(db,"Books书籍")); if(!s.exists())return"BK0001";
-    const list=Object.keys(s.val()); const last=list.sort().pop();
-    const num=parseInt(last.replace("BK",""))+1; return "BK"+String(num).padStart(4,"0");
+    try{
+      const s=await get(ref(db,"Books书籍")); if(!s.exists())return"BK0001";
+      const list=Object.keys(s.val()); const last=list.sort().pop();
+      const num=parseInt(last.replace("BK",""))+1; return "BK"+String(num).padStart(4,"0");
+    }catch{return "BK0001"}
   }
   document.addEventListener("DOMContentLoaded",async()=>{ e("code").value=bookParam||await genId(); });
+
   e("save").onclick=async()=>{
-    const code=e("code").value.trim(), title=e("title").value.trim(); if(!title)return msg.textContent="请填写书名";
-    const isbn=e("isbn").value.trim();
-    const google=isbn?`https://www.google.com/search?q=${isbn}`:`https://www.google.com/search?q=${encodeURIComponent(title)}`;
-    await set(ref(db,`Books书籍/${code}`),{
-      ISBN书号:isbn,书名:title,作者:e("author").value,系列名:e("series").value,
-      借阅状况:e("status").value||"可借阅",借阅人:e("borrower").value||"",googleLink:google
-    });
-    e("googleLink").value=google; msg.textContent="✅ 已保存";
+    try{
+      const code=e("code").value.trim(), title=e("title").value.trim(); if(!title) return msg.textContent="请填写书名";
+      const isbn=e("isbn").value.trim();
+      const google=isbn?`https://www.google.com/search?q=${isbn}`:`https://www.google.com/search?q=${encodeURIComponent(title)}`;
+      await set(ref(db,`Books书籍/${code}`),{
+        ISBN书号:isbn,书名:title,作者:e("author").value,系列名:e("series").value,
+        借阅状况:e("status").value||"可借阅",借阅人:e("borrower").value||"",googleLink:google
+      });
+      e("googleLink").value=google; msg.textContent="✅ 已保存";
+    }catch(e){ msg.textContent="❌ 保存失败："+(e?.message||e); }
   };
+
   e("load").onclick=async()=>{
-    const code=e("code").value.trim(); const s=await get(ref(db,`Books书籍/${code}`));
-    if(!s.exists())return msg.textContent="未找到"; const b=s.val();
-    for(const k of ["isbn","title","author","series","status","borrower","googleLink"]){ const el=e(k); if(el) el.value=b[el.id==="isbn"?"ISBN书号":el.id]||""; }
-    msg.textContent="✅ 已读取";
+    try{
+      const code=e("code").value.trim(); const s=await get(ref(db,`Books书籍/${code}`));
+      if(!s.exists()) return msg.textContent="未找到"; const b=s.val();
+      e("isbn").value=b["ISBN书号"]||""; e("title").value=b["书名"]||""; e("author").value=b["作者"]||"";
+      e("series").value=b["系列名"]||""; e("status").value=b["借阅状况"]||""; e("borrower").value=b["借阅人"]||""; e("googleLink").value=b["googleLink"]||"";
+      msg.textContent="✅ 已读取";
+    }catch(e){ msg.textContent="❌ 读取失败："+(e?.message||e); }
   };
-  e("del").onclick=async()=>{ if(!confirm("确定删除?"))return; await remove(ref(db,`Books书籍/${e("code").value}`)); msg.textContent="🗑 已删除"; };
+
+  e("del").onclick=async()=>{
+    try{
+      const code=e("code").value.trim(); if(!confirm("确定删除?")) return;
+      await remove(ref(db,`Books书籍/${code}`)); msg.textContent="🗑 已删除 "+code;
+    }catch(e){ msg.textContent="❌ 删除失败："+(e?.message||e); }
+  };
 </script>
 </body>
 </html>

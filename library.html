@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>小金库图书馆</title>
-  <link rel="icon" href="assets/favicon.ico">
+  <link rel="icon" href="assets/icons/whatsapp.svg">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <header></header>
 
 <main class="wrap">
-  <div class="toolbar">
+  <div class="toolbar" style="display:grid;gap:10px;grid-template-columns:1fr 240px auto;">
     <input id="q" data-i18n-placeholder="search_placeholder">
     <select id="status">
       <option value="" data-i18n="status_all"></option>
@@ -21,9 +21,9 @@
     <button class="primary" id="addBtn"><span data-i18n="add_book"></span></button>
   </div>
 
-  <div class="card">
+  <div class="card" style="margin-top:14px;">
     <table>
-      <thead><tr><th>书号</th><th>书名</th><th>作者</th><th>系列</th><th>ISBN</th><th>状态</th><th>借阅人</th></tr></thead>
+      <thead><tr><th>书号</th><th>书名 / 借阅人</th><th>作者</th><th>系列</th><th>ISBN</th><th>状态</th><th>操作</th></tr></thead>
       <tbody id="tbody"><tr><td colspan="7" class="muted">加载中...</td></tr></tbody>
     </table>
   </div>
@@ -38,31 +38,36 @@
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
   const role = localStorage.getItem("role") || "guest";
-  const qEl = document.getElementById('q'), statusEl=document.getElementById('status'), tbody=document.getElementById('tbody'), addBtn=document.getElementById('addBtn');
-  if(role==="guest") addBtn.style.display="none";
-  addBtn.onclick=()=>location.href='admin.html';
+  const qEl=document.getElementById('q'), statusEl=document.getElementById('status'), tbody=document.getElementById('tbody'), addBtn=document.getElementById('addBtn');
+  if(role==="guest") addBtn.style.display="none"; else addBtn.onclick=()=>location.href='admin.html';
   qEl.oninput=render; statusEl.onchange=render;
+
   let books={};
-  onValue(ref(db,"Books书籍"),snap=>{
-    books=snap.val()||{}; render();
+  onValue(ref(db,"Books书籍"),snap=>{ books=snap.val()||{}; render(); }, err=>{
+    tbody.innerHTML=`<tr><td colspan="7" class="muted">加载失败：${err?.message||''}</td></tr>`;
   });
+
   function render(){
     const q=(qEl.value||'').toLowerCase(), s=statusEl.value;
     const rows=Object.entries(books).map(([id,b])=>({书号:id,...b}))
       .filter(r=>{
         const matchQ=!q||[r.书号,r.书名,r.作者].join(' ').toLowerCase().includes(q);
         const matchS=!s||r.借阅状况===s;
-        return matchQ&&matchS;
+        return matchQ && matchS;
       });
-    tbody.innerHTML=rows.length?rows.map(r=>`
+    tbody.innerHTML = rows.length? rows.map(r=>`
       <tr>
         <td>${r.书号}</td>
         <td><strong>${r.书名||''}</strong><br><small class="muted">${r.借阅人?`借阅人：${r.借阅人}`:'可借阅'}</small></td>
         <td>${r.作者||''}</td><td>${r.系列名||''}</td>
         <td>${r['ISBN书号']||''}</td>
         <td><span class="${r.借阅状况==='可借阅'?'badge ok':'badge warn'}">${r.借阅状况||''}</span></td>
-        <td>${role==='admin'?`<a href='admin.html?book=${r.书号}'>编辑</a>`:''}</td>
-      </tr>`).join(''):`<tr><td colspan="7" class="muted">无匹配结果</td></tr>`;
+        <td>${role==='admin'
+            ? `<a href='admin.html?book=${r.书号}'>编辑</a> · <a href='borrow.html?book=${r.书号}'>借/还</a>`
+            : `<a href='borrow.html?book=${r.书号}'>查看状态</a>`
+          }</td>
+      </tr>`).join('')
+      : `<tr><td colspan="7" class="muted">无匹配结果</td></tr>`;
   }
 </script>
 </body>

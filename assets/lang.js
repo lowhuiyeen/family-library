@@ -1,17 +1,21 @@
-let LANG = "zh";
+let LANG = localStorage.getItem("lang") || "zh";
 let DICT = {};
 
 async function initLang() {
-  const saved = localStorage.getItem("lang");
-  LANG = saved || "zh";
-  const res = await fetch("assets/lang.json");
-  DICT = await res.json();
+  try {
+    const res = await fetch("assets/lang.json");
+    DICT = await res.json();
+  } catch (e) {
+    console.error("lang.json load error", e);
+    DICT = {};
+  }
   applyLang(LANG);
   setupLangButtons();
 }
 
 function setupLangButtons() {
   const buttons = document.querySelectorAll(".lang-btn");
+  if (!buttons.length) return;
   buttons.forEach(btn => {
     const code = btn.dataset.lang;
     if (code === LANG) btn.classList.add("active");
@@ -36,5 +40,6 @@ function applyLang(lang) {
   });
 }
 
+// expose
 window.initLang = initLang;
 window.applyLang = applyLang;

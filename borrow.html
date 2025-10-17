@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>借阅 / 归还</title>
-<link rel="icon" href="assets/favicon.ico"><link rel="stylesheet" href="assets/style.css">
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script>emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>借阅 / 归还</title>
+  <link rel="icon" href="assets/icons/whatsapp.svg">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");</script>
 </head>
 <body>
 <header></header>
@@ -25,26 +27,35 @@
   import { firebaseConfig } from "./assets/firebase-config.js";
   const app=initializeApp(firebaseConfig); const db=getDatabase(app);
   const e=id=>document.getElementById(id), msg=e("msg");
+
+  // Pre-fill if coming from library.html
+  const p=new URLSearchParams(location.search); if(p.has("book")) e("bookId").value=p.get("book");
+
   async function addRecord(bookId,action,name){
     const r=ref(db,`Records记录/${bookId}`); const s=await get(r); const list=s.exists()?s.val():[];
     list.push({日期时间:new Date().toLocaleString("zh-CN"),操作类型:action,借阅人:name});
     await set(r,list);
   }
   async function borrow(){
-    const id=e("bookId").value,name=e("name").value; if(!id||!name)return msg.textContent="请填写完整";
-    await update(ref(db,`Books书籍/${id}`),{借阅状况:"已被借阅",借阅人:name}); await addRecord(id,"借书",name);
-    sendMail("借书",name,id); msg.textContent="✅ 已借出";
+    try{
+      const id=e("bookId").value.trim(), name=e("name").value.trim(); if(!id||!name) return msg.textContent="请填写完整";
+      await update(ref(db,`Books书籍/${id}`),{借阅状况:"已被借阅",借阅人:name}); await addRecord(id,"借书",name);
+      sendMail("借书",name,id); msg.textContent="✅ 已借出";
+    }catch(err){ msg.textContent="❌ 错误："+(err?.message||err); }
   }
   async function ret(){
-    const id=e("bookId").value,name=e("name").value; if(!id||!name)return msg.textContent="请填写完整";
-    await update(ref(db,`Books书籍/${id}`),{借阅状况:"可借阅",借阅人:""}); await addRecord(id,"还书",name);
-    sendMail("还书",name,id); msg.textContent="✅ 已归还";
+    try{
+      const id=e("bookId").value.trim(), name=e("name").value.trim(); if(!id||!name) return msg.textContent="请填写完整";
+      await update(ref(db,`Books书籍/${id}`),{借阅状况:"可借阅",借阅人:""}); await addRecord(id,"还书",name);
+      sendMail("还书",name,id); msg.textContent="✅ 已归还";
+    }catch(err){ msg.textContent="❌ 错误："+(err?.message||err); }
   }
   function sendMail(action,name,book){
-    const msg=action==="借书"?`您好 ${name}, 您已借阅 ${book}. 请按时归还，谢谢!`:`您好 ${name}, 您已归还 ${book}. 感谢配合!`;
-    emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{to_name:name,message:msg});
+    const message = action==="借书" ? `您好 ${name}, 您已借阅 ${book}. 请按时归还，谢谢!` : `您好 ${name}, 您已归还 ${book}. 感谢配合!`;
+    emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{to_name:name,message});
   }
-  e("borrowBtn").onclick=borrow; e("returnBtn").onclick=ret;
+  document.getElementById("borrowBtn").onclick=borrow;
+  document.getElementById("returnBtn").onclick=ret;
 </script>
 </body>
 </html>

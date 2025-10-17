@@ -1,76 +1,53 @@
-<!DOCTYPE html>
-<html lang="zh">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>登录 小金库图书馆 | Family Library Login</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录 / Login</title>
+  <link rel="icon" href="assets/icons/whatsapp.svg">
+  <link rel="stylesheet" href="assets/style.css">
 </head>
+<body>
+<header></header>
+<main class="wrap">
+  <div class="form-card">
+    <h2>🔐 登录</h2>
+    <div class="form-grid">
+      <div><label>邮箱</label><input id="email" type="email" placeholder="you@example.com"></div>
+      <div><label>密码</label><input id="password" type="password" placeholder="••••••••"></div>
+    </div>
+    <div class="actions"><button class="primary" id="login-btn">登录 / Login</button></div>
+    <p id="msg" class="form-note"></p>
+    <p class="form-note"><a href="library.html">先看看馆藏 →</a></p>
+  </div>
+</main>
+<footer></footer>
+<script src="assets/load-layout.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+  import { firebaseConfig } from "./assets/firebase-config.js";
+  const app = initializeApp(firebaseConfig); const auth = getAuth(app);
+  const msg = document.getElementById("msg"); const btn = document.getElementById("login-btn");
 
-<body class="bg-app center">
-  <section class="card narrow">
-    <h2>🔐 登录 小金库图书馆</h2>
-
-    <input
-      type="email"
-      id="email"
-      placeholder="📧 邮箱 Email"
-      autofocus
-    />
-    <input
-      type="password"
-      id="password"
-      placeholder="🔑 密码 Password"
-    />
-
-    <button class="btn-primary" id="login-btn">登录 / Login</button>
-    <p id="msg" class="error"></p>
-  </section>
-
-  <script type="module">
-    import { app } from "./firebase-config.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      onAuthStateChanged,
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-    const auth = getAuth(app);
-    const msg = document.getElementById("msg");
-    const btn = document.getElementById("login-btn");
-
-    async function login() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      if (!email || !password) {
-        msg.textContent =
-          "⚠️ 请输入邮箱和密码 / Please enter both email and password";
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = "⏳ 登录中 ...";
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "app.html";
-      } catch (e) {
-        msg.textContent = "❌ 登录失败 / Login failed: " + e.message;
-        btn.disabled = false;
-        btn.textContent = "登录 / Login";
-      }
+  async function login() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    if (!email || !password) return msg.textContent = "⚠️ 请输入邮箱和密码";
+    btn.disabled = true; btn.textContent = "⏳ 登录中 ...";
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      localStorage.setItem("role", "admin");
+      location.href = "library.html";
+    } catch (e) {
+      msg.textContent = "❌ 登录失败：" + (e?.message||e);
+      btn.disabled = false; btn.textContent = "登录 / Login";
     }
+  }
 
-    document.getElementById("login-btn").addEventListener("click", login);
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") login();
-    });
-
-    // Auto-redirect if already logged in
-    onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = "app.html";
-    });
-  </script>
+  document.getElementById("login-btn").addEventListener("click", login);
+  document.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+  onAuthStateChanged(auth, user => { if (user) location.href = "library.html"; });
+</script>
 </body>
 </html>
