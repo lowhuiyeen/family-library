@@ -1,11 +1,13 @@
+// === Load Header, Footer, Theme, Language, and Auth Controls ===
 async function loadLayout() {
+  // 🌙 Initialize theme (if not set)
   if (!localStorage.getItem("theme")) {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.dataset.theme = prefersDark ? "dark" : "light";
     localStorage.setItem("theme", prefersDark ? "dark" : "light");
   }
 
-  // Header
+  // === Header ===
   const hTarget = document.querySelector("header");
   if (hTarget) {
     try {
@@ -16,7 +18,7 @@ async function loadLayout() {
     }
   }
 
-  // Footer
+  // === Footer ===
   const fTarget = document.querySelector("footer");
   if (fTarget) {
     try {
@@ -27,44 +29,46 @@ async function loadLayout() {
     }
   }
 
-  // Language system
+  // === Language System ===
   try {
     await import("./lang.js");
     window.initLang();
-   // === Auth + Theme Controls ===
+
+    // === Auth + Theme Controls ===
     const root = document.documentElement;
     const role = localStorage.getItem("role");
+    const userEmail = localStorage.getItem("userEmail") || "";
 
-    // logout button (admin only)
+    // --- Auth Controls (admin only) ---
     const authControls = document.getElementById("authControls");
     const logoutBtn = document.getElementById("logoutBtn");
-    if (role === "admin" && authControls) authControls.style.display = "block";
+
+    if (role === "admin" && authControls) {
+      authControls.style.display = "block";
+    }
+
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         localStorage.removeItem("role");
+        localStorage.removeItem("userEmail");
         alert("您已登出 / You have logged out");
         location.href = "library.html";
       });
     }
 
-    // theme toggle using SVG icons
-    const themeBtn  = document.getElementById("themeToggle");
+    // --- Theme Toggle ---
+    const themeBtn = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");
 
-    // default to system preference if no saved choice
-    if (!localStorage.getItem("theme")) {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      localStorage.setItem("theme", prefersDark ? "dark" : "light");
-    }
     let theme = localStorage.getItem("theme") || "light";
     root.dataset.theme = theme;
 
-    // set correct icon
     function setThemeIcon(mode) {
       if (!themeIcon) return;
-      themeIcon.src = mode === "dark"
-        ? "assets/icons/light-mode.svg"  // sun when currently dark
-        : "assets/icons/dark-mode.svg";  // moon when currently light
+      themeIcon.src =
+        mode === "dark"
+          ? "assets/icons/light-mode.svg" // sun when dark
+          : "assets/icons/dark-mode.svg"; // moon when light
     }
     setThemeIcon(theme);
 
@@ -77,6 +81,26 @@ async function loadLayout() {
       });
     }
 
+    // --- Redirect guest if not logged in and page requires auth ---
+    const restrictedPages = ["admin.html", "borrow.html", "return.html"];
+    const currentPage = location.pathname.split("/").pop();
+    if (restrictedPages.includes(currentPage) && !userEmail) {
+      alert("⚠️ 请先登录 / Please sign in first.");
+      location.href = "login.html?redirect=" + encodeURIComponent(currentPage);
+    }
+
+    // --- Auto-set role if admin email ---
+    const adminEmails = [
+      "lowhuiye@gmail.com",
+      "lowzhenyong2009@gmail.com",
+      "lowhuiyeen@gmail.com",
+      "lowhuicheen@gmail.com",
+    ];
+    if (adminEmails.includes(userEmail)) {
+      localStorage.setItem("role", "admin");
+    } else if (userEmail) {
+      localStorage.setItem("role", "user");
+    }
 
   } catch (e) {
     console.error("lang loader error", e);

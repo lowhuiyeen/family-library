@@ -1,5 +1,4 @@
 :root {
-  /* Light Theme */
   --bg: #f7f8fa;
   --card: #ffffff;
   --ink: #11131a;
@@ -9,7 +8,6 @@
   --warn: #c47f00;
   --radius: 12px;
 }
-
 [data-theme="dark"] {
   --bg: #121826;
   --card: #1b2238;
@@ -19,6 +17,7 @@
   --ok: #44e260;
   --warn: #ffc14d;
 }
+
 
 /* ---------- BASE ---------- */
 * { box-sizing: border-box; margin: 0; padding: 0; }

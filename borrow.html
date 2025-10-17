@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title data-i18n="borrow_title">借书 / Borrow Book</title>
+  <title data-i18n="borrow_title">借书 | Family Library</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -12,69 +12,107 @@
 <main class="wrap">
   <div class="form-card">
     <h2 data-i18n="borrow_heading">📖 借书</h2>
-    <div class="form-grid two">
-      <div>
-        <label data-i18n="label_code">书号</label>
-        <input id="bookId" readonly>
-      </div>
-      <div>
-        <label data-i18n="label_name">借阅人姓名</label>
-        <input id="name" data-i18n-placeholder="placeholder_name">
-      </div>
+    <div class="form-grid">
+      <label data-i18n="label_code">书号</label>
+      <input type="text" id="bookId" placeholder="BK0001">
+
+      <label data-i18n="label_name">借阅人姓名</label>
+      <input list="borrowerList" type="text" id="borrower" data-i18n-placeholder="placeholder_name" placeholder="请输入姓名">
+      <datalist id="borrowerList"></datalist>
     </div>
+
     <div class="actions">
       <button class="primary" id="borrowBtn" data-i18n="btn_borrow">借出</button>
+      <a href="library.html" class="form-note" data-i18n="back_library">← 返回馆藏</a>
     </div>
-    <p id="msg" class="form-note"></p>
-    <p class="form-note"><a href="library.html" data-i18n="back_library">← 返回馆藏</a></p>
   </div>
 </main>
 
 <footer></footer>
-<script src="assets/load-layout.js"></script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-  import { getDatabase, ref, get, update, set } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
-  import { firebaseConfig } from "./assets/firebase-config.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import { getDatabase, ref, update, get, child, set } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+import { firebaseConfig } from "./assets/firebase-config.js";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const e = id => document.getElementById(id);
-  const msg = e("msg");
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  const params = new URLSearchParams(location.search);
-  const book = params.get("book");
-  if (book) e("bookId").value = book;
+// Auto-fill Book ID
+const params = new URLSearchParams(window.location.search);
+const bookFromURL = params.get("book");
+if (bookFromURL) document.getElementById("bookId").value = bookFromURL;
 
-  async function addRecord(bookId, action, name) {
-    const r = ref(db, `Records记录/${bookId}`);
-    const s = await get(r);
-    const list = s.exists() ? s.val() : [];
-    list.push({ 时间: new Date().toLocaleString(), 操作: action, 借阅人: name });
-    await set(r, list);
+// Borrower history
+function loadBorrowerHistory() {
+  try { return JSON.parse(localStorage.getItem("borrowerHistory") || "[]"); }
+  catch { return []; }
+}
+function saveBorrowerName(name) {
+  if (!name) return;
+  const list = loadBorrowerHistory();
+  if (!list.includes(name)) {
+    list.push(name);
+    localStorage.setItem("borrowerHistory", JSON.stringify(list));
+  }
+}
+function renderBorrowerList() {
+  const list = loadBorrowerHistory();
+  document.getElementById("borrowerList").innerHTML = list.map(n => `<option value="${n}"></option>`).join("");
+}
+renderBorrowerList();
+
+// MYT helper
+function getMYTDateTime() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const myt = new Date(utc + 8 * 60 * 60000);
+  const pad = n => n.toString().padStart(2, "0");
+  const date = `${myt.getFullYear()}${pad(myt.getMonth() + 1)}${pad(myt.getDate())}`;
+  const time = `${pad(myt.getHours())}${pad(myt.getMinutes())}${pad(myt.getSeconds())}`;
+  const human = `${myt.getFullYear()}-${pad(myt.getMonth() + 1)}-${pad(myt.getDate())} ${pad(myt.getHours())}:${pad(myt.getMinutes())}:${pad(myt.getSeconds())}`;
+  return { key: `${date}_${time}`, human };
+}
+
+async function recordBookAction(bookId, bookName, borrower, actionType) {
+  const { key, human } = getMYTDateTime();
+  const recordRef = ref(db, `Records记录/${bookId}/${key}`);
+  await set(recordRef, {
+    "书名": bookName || "",
+    "借阅人": borrower,
+    "操作类型": actionType,
+    "日期时间": `${human} (MYT)`
+  });
+}
+
+document.getElementById("borrowBtn").addEventListener("click", async () => {
+  const bookId = document.getElementById("bookId").value.trim();
+  const borrower = document.getElementById("borrower").value.trim();
+  const userEmail = localStorage.getItem("userEmail") || "";
+  const role = localStorage.getItem("role") || "guest";
+
+  if (!userEmail) return alert("⚠️ 请先使用 Google 登录 / Please sign in first.");
+  if (!bookId || !borrower) return alert("请输入书号和借阅人姓名！");
+
+  const dbRef = ref(db);
+  const snap = await get(child(dbRef, `Books书籍/${bookId}`));
+  if (!snap.exists()) return alert("❌ 未找到此书籍编号。");
+  const bookData = snap.val();
+
+  if (bookData["借阅状况"] === "已被借阅" && role !== "admin") {
+    alert("⚠️ 此书籍已被借出，只有管理员可操作。");
+    return;
   }
 
-  async function borrow() {
-    const lang = localStorage.getItem("lang") || "zh";
-    const DICT = {
-      zh: { fill: "⚠️ 请填写完整信息", ok: "✅ 已成功借出", err: "❌ 错误：" },
-      en: { fill: "⚠️ Please fill in all fields.", ok: "✅ Borrowed successfully!", err: "❌ Error: " },
-      jp: { fill: "⚠️ 全ての項目を入力してください。", ok: "✅ 借り出し完了！", err: "❌ エラー: " }
-    }[lang];
+  await update(ref(db, `Books书籍/${bookId}`), { "借阅人": borrower, "借阅状况": "已被借阅" });
+  await recordBookAction(bookId, bookData["书名"], borrower, "借书");
 
-    try {
-      const id = e("bookId").value.trim(), name = e("name").value.trim();
-      if (!id || !name) return msg.textContent = DICT.fill;
-      await update(ref(db, `Books书籍/${id}`), { 借阅状况: "已被借阅", 借阅人: name });
-      await addRecord(id, "借书", name);
-      msg.textContent = DICT.ok;
-    } catch (err) {
-      msg.textContent = DICT.err + (err.message || err);
-    }
-  }
-
-  e("borrowBtn").onclick = borrow;
+  saveBorrowerName(borrower);
+  alert("✅ 借书成功 / Book borrowed successfully!");
+  location.href = "library.html";
+});
 </script>
+
+<script src="assets/load-layout.js"></script>
 </body>
 </html>
