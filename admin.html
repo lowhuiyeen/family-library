@@ -3,72 +3,166 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>新增 / 修改书籍</title>
+  <title data-i18n="admin_title">新增 / 修改书籍</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <header></header>
+
 <main class="wrap">
   <div class="form-card">
-    <h2>🛠 新增 / 修改书籍</h2>
+    <h2 data-i18n="admin_heading">🛠 新增 / 修改书籍</h2>
+
     <div class="form-grid two">
-      <div><label>书号*</label><input id="code" readonly></div>
-      <div><label>ISBN书号</label><input id="isbn"></div>
+      <div>
+        <label data-i18n="label_code">书号*</label>
+        <input id="code" readonly>
+      </div>
+      <div>
+        <label data-i18n="label_isbn">ISBN书号</label>
+        <input id="isbn">
+      </div>
     </div>
-    <label>书名*</label><input id="title">
-    <div class="form-grid two"><div><label>作者</label><input id="author"></div><div><label>系列名</label><input id="series"></div></div>
-    <div class="form-grid two"><div><label>借阅状况</label><input id="status" placeholder="可借阅 / 已被借阅"></div><div><label>借阅人</label><input id="borrower"></div></div>
-    <label>Google 搜索链接</label><input id="googleLink" readonly>
-    <div class="actions"><button class="primary" id="save">保存</button><button id="load">读取</button><button class="danger" id="del">删除</button></div>
-    <p id="msg" class="form-note"></p><p class="form-note"><a href="library.html">← 返回馆藏</a></p>
+
+    <label data-i18n="label_title">书名*</label>
+    <input id="title">
+
+    <div class="form-grid two">
+      <div>
+        <label data-i18n="label_author">作者</label>
+        <input id="author">
+      </div>
+      <div>
+        <label data-i18n="label_series">系列名</label>
+        <input id="series">
+      </div>
+    </div>
+
+    <div class="form-grid two">
+      <div>
+        <label data-i18n="label_status">借阅状况</label>
+        <input id="status" data-i18n-placeholder="placeholder_status">
+      </div>
+      <div>
+        <label data-i18n="label_borrower">借阅人</label>
+        <input id="borrower" data-i18n-placeholder="placeholder_borrower">
+      </div>
+    </div>
+
+    <label data-i18n="label_google">Google 搜索链接</label>
+    <input id="googleLink" readonly>
+
+    <div class="actions">
+      <button class="primary" id="save" data-i18n="btn_save">保存</button>
+      <button id="load" data-i18n="btn_load">读取</button>
+      <button class="danger" id="del" data-i18n="btn_delete">删除</button>
+    </div>
+
+    <p id="msg" class="form-note"></p>
+    <p class="form-note"><a href="library.html" data-i18n="back_library">← 返回馆藏</a></p>
   </div>
 </main>
+
 <footer></footer>
 <script src="assets/load-layout.js"></script>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
   import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
   import { firebaseConfig } from "./assets/firebase-config.js";
-  const app=initializeApp(firebaseConfig); const db=getDatabase(app);
-  const e=id=>document.getElementById(id), msg=e("msg");
-  const bookParam=new URL(location.href).searchParams.get("book");
-  async function genId(){
-    try{
-      const s=await get(ref(db,"Books书籍")); if(!s.exists())return"BK0001";
-      const list=Object.keys(s.val()); const last=list.sort().pop();
-      const num=parseInt(last.replace("BK",""))+1; return "BK"+String(num).padStart(4,"0");
-    }catch{return "BK0001"}
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const e = id => document.getElementById(id);
+  const msg = e("msg");
+  const bookParam = new URL(location.href).searchParams.get("book");
+
+  async function genId() {
+    try {
+      const s = await get(ref(db, "Books书籍"));
+      if (!s.exists()) return "BK0001";
+      const list = Object.keys(s.val());
+      const last = list.sort().pop();
+      const num = parseInt(last.replace("BK", "")) + 1;
+      return "BK" + String(num).padStart(4, "0");
+    } catch {
+      return "BK0001";
+    }
   }
-  document.addEventListener("DOMContentLoaded",async()=>{ e("code").value=bookParam||await genId(); });
 
-  e("save").onclick=async()=>{
-    try{
-      const code=e("code").value.trim(), title=e("title").value.trim(); if(!title) return msg.textContent="请填写书名";
-      const isbn=e("isbn").value.trim();
-      const google=isbn?`https://www.google.com/search?q=${isbn}`:`https://www.google.com/search?q=${encodeURIComponent(title)}`;
-      await set(ref(db,`Books书籍/${code}`),{
-        ISBN书号:isbn,书名:title,作者:e("author").value,系列名:e("series").value,
-        借阅状况:e("status").value||"可借阅",借阅人:e("borrower").value||"",googleLink:google
+  document.addEventListener("DOMContentLoaded", async () => {
+    e("code").value = bookParam || await genId();
+  });
+
+  e("save").onclick = async () => {
+    const lang = localStorage.getItem("lang") || "zh";
+    const MSG = {
+      zh: { titleReq: "请填写书名", ok: "✅ 已保存", fail: "❌ 保存失败：" },
+      en: { titleReq: "Please enter the book title", ok: "✅ Saved successfully", fail: "❌ Save failed: " },
+      jp: { titleReq: "書名を入力してください", ok: "✅ 保存完了", fail: "❌ 保存失敗: " }
+    }[lang];
+    try {
+      const code = e("code").value.trim();
+      const title = e("title").value.trim();
+      if (!title) return msg.textContent = MSG.titleReq;
+      const isbn = e("isbn").value.trim();
+      const google = isbn ? `https://www.google.com/search?q=${isbn}` : `https://www.google.com/search?q=${encodeURIComponent(title)}`;
+      await set(ref(db, `Books书籍/${code}`), {
+        ISBN书号: isbn,
+        书名: title,
+        作者: e("author").value,
+        系列名: e("series").value,
+        借阅状况: e("status").value || "可借阅",
+        借阅人: e("borrower").value || "",
+        googleLink: google
       });
-      e("googleLink").value=google; msg.textContent="✅ 已保存";
-    }catch(e){ msg.textContent="❌ 保存失败："+(e?.message||e); }
+      e("googleLink").value = google;
+      msg.textContent = MSG.ok;
+    } catch (e) {
+      msg.textContent = MSG.fail + (e?.message || e);
+    }
   };
 
-  e("load").onclick=async()=>{
-    try{
-      const code=e("code").value.trim(); const s=await get(ref(db,`Books书籍/${code}`));
-      if(!s.exists()) return msg.textContent="未找到"; const b=s.val();
-      e("isbn").value=b["ISBN书号"]||""; e("title").value=b["书名"]||""; e("author").value=b["作者"]||"";
-      e("series").value=b["系列名"]||""; e("status").value=b["借阅状况"]||""; e("borrower").value=b["借阅人"]||""; e("googleLink").value=b["googleLink"]||"";
-      msg.textContent="✅ 已读取";
-    }catch(e){ msg.textContent="❌ 读取失败："+(e?.message||e); }
+  e("load").onclick = async () => {
+    const lang = localStorage.getItem("lang") || "zh";
+    const MSG = {
+      zh: { notFound: "未找到", ok: "✅ 已读取", fail: "❌ 读取失败：" },
+      en: { notFound: "Not found", ok: "✅ Loaded successfully", fail: "❌ Load failed: " },
+      jp: { notFound: "見つかりません", ok: "✅ 読み込み完了", fail: "❌ 読み込み失敗: " }
+    }[lang];
+    try {
+      const code = e("code").value.trim();
+      const s = await get(ref(db, `Books书籍/${code}`));
+      if (!s.exists()) return msg.textContent = MSG.notFound;
+      const b = s.val();
+      e("isbn").value = b["ISBN书号"] || "";
+      e("title").value = b["书名"] || "";
+      e("author").value = b["作者"] || "";
+      e("series").value = b["系列名"] || "";
+      e("status").value = b["借阅状况"] || "";
+      e("borrower").value = b["借阅人"] || "";
+      e("googleLink").value = b["googleLink"] || "";
+      msg.textContent = MSG.ok;
+    } catch (e) {
+      msg.textContent = MSG.fail + (e?.message || e);
+    }
   };
 
-  e("del").onclick=async()=>{
-    try{
-      const code=e("code").value.trim(); if(!confirm("确定删除?")) return;
-      await remove(ref(db,`Books书籍/${code}`)); msg.textContent="🗑 已删除 "+code;
-    }catch(e){ msg.textContent="❌ 删除失败："+(e?.message||e); }
+  e("del").onclick = async () => {
+    const lang = localStorage.getItem("lang") || "zh";
+    const MSG = {
+      zh: { confirm: "确定删除？", ok: "🗑 已删除", fail: "❌ 删除失败：" },
+      en: { confirm: "Are you sure to delete?", ok: "🗑 Deleted", fail: "❌ Delete failed: " },
+      jp: { confirm: "削除してもよろしいですか？", ok: "🗑 削除完了", fail: "❌ 削除失敗: " }
+    }[lang];
+    try {
+      const code = e("code").value.trim();
+      if (!confirm(MSG.confirm)) return;
+      await remove(ref(db, `Books书籍/${code}`));
+      msg.textContent = `${MSG.ok} ${code}`;
+    } catch (e) {
+      msg.textContent = MSG.fail + (e?.message || e);
+    }
   };
 </script>
 </body>

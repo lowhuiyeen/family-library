@@ -1,47 +1,46 @@
 {
-  "title": {
-    "zh": "小金库图书馆",
-    "en": "Little Treasury Library",
-    "jp": "小さな宝の図書館"
-  },
-  "footer_name": {
-    "zh": "罗·二哈·卉云",
-    "en": "Luo Erha Huiyun",
-    "jp": "ルオ・アーハ・フイユン"
-  },
-  "add_book": {
-    "zh": "新增 / 修改书籍",
-    "en": "Add / Edit Book",
-    "jp": "本を追加 / 編集"
-  },
-  "status_all": {
-    "zh": "全部状态",
-    "en": "All Status",
-    "jp": "すべての状態"
-  },
-  "status_avail": {
-    "zh": "可借阅",
-    "en": "Available",
-    "jp": "貸出可"
-  },
-  "status_borrowed": {
-    "zh": "已被借阅",
-    "en": "Borrowed",
-    "jp": "貸出中"
-  },
-  "search_placeholder": {
-    "zh": "搜索书名 / 作者 / 书号",
-    "en": "Search title / author / code",
-    "jp": "書名 / 著者 / コードを検索"
-  },
-  "hero_sub": {
-    "zh": "家庭专属图书管理系统",
-    "en": "Private Family Library System",
-    "jp": "家族専用の図書管理システム"
-  },
-  "login_btn": {
-    "zh": "登录 / Login",
-    "en": "Login",
-    "jp": "ログイン"
-  }
+  "title": { "zh": "小金库图书馆", "en": "Little Treasury Library", "jp": "小さな宝の図書館" },
+  "hero_sub": { "zh": "家庭专属图书管理系统", "en": "Private Family Library System", "jp": "家族専用の図書管理システム" },
+  "login_btn": { "zh": "登录 / Login", "en": "Login", "jp": "ログイン" },
+
+  "add_book": { "zh": "新增 / 修改书籍", "en": "Add / Edit Book", "jp": "本を追加 / 編集" },
+  "status_all": { "zh": "全部状态", "en": "All Status", "jp": "すべての状態" },
+  "status_avail": { "zh": "可借阅", "en": "Available", "jp": "貸出可" },
+  "status_borrowed": { "zh": "已被借阅", "en": "Borrowed", "jp": "貸出中" },
+  "search_placeholder": { "zh": "搜索书名 / 作者 / 书号", "en": "Search title / author / code", "jp": "書名 / 著者 / コードを検索" },
+
+  "col_code": { "zh": "书号", "en": "Code", "jp": "コード" },
+  "col_title": { "zh": "书名 / 借阅人", "en": "Title / Borrower", "jp": "タイトル / 借り手" },
+  "col_author": { "zh": "作者", "en": "Author", "jp": "著者" },
+  "col_series": { "zh": "系列", "en": "Series", "jp": "シリーズ" },
+  "col_isbn": { "zh": "ISBN", "en": "ISBN", "jp": "ISBN" },
+  "col_status": { "zh": "状态", "en": "Status", "jp": "状態" },
+  "col_action": { "zh": "操作", "en": "Action", "jp": "操作" },
+  "loading": { "zh": "加载中...", "en": "Loading...", "jp": "読み込み中..." },
+
+  "borrow_title": { "zh": "借书", "en": "Borrow Book", "jp": "本を借りる" },
+  "borrow_heading": { "zh": "📖 借书", "en": "📖 Borrow Book", "jp": "📖 本を借りる" },
+  "return_title": { "zh": "还书", "en": "Return Book", "jp": "本を返す" },
+  "return_heading": { "zh": "📦 还书", "en": "📦 Return Book", "jp": "📦 本を返す" },
+  "label_code": { "zh": "书号", "en": "Book Code", "jp": "コード" },
+  "label_name": { "zh": "借阅人姓名", "en": "Borrower Name", "jp": "借り手の名前" },
+  "placeholder_name": { "zh": "请输入姓名", "en": "Enter your name", "jp": "名前を入力してください" },
+  "btn_borrow": { "zh": "借出", "en": "Borrow", "jp": "借りる" },
+  "btn_return": { "zh": "归还", "en": "Return", "jp": "返す" },
+  "back_library": { "zh": "← 返回馆藏", "en": "← Back to Library", "jp": "← 図書館に戻る" },
+
+  "admin_title": { "zh": "新增 / 修改书籍", "en": "Add / Edit Book", "jp": "本を追加 / 編集" },
+  "admin_heading": { "zh": "🛠 新增 / 修改书籍", "en": "🛠 Add / Edit Book", "jp": "🛠 本を追加 / 編集" },
+  "label_isbn": { "zh": "ISBN书号", "en": "ISBN", "jp": "ISBN" },
+  "label_title": { "zh": "书名*", "en": "Title*", "jp": "書名*" },
+  "label_author": { "zh": "作者", "en": "Author", "jp": "著者" },
+  "label_series": { "zh": "系列名", "en": "Series", "jp": "シリーズ" },
+  "label_status": { "zh": "借阅状况", "en": "Status", "jp": "状態" },
+  "placeholder_status": { "zh": "可借阅 / 已被借阅", "en": "Available / Borrowed", "jp": "貸出可 / 貸出中" },
+  "label_borrower": { "zh": "借阅人", "en": "Borrower", "jp": "借り手" },
+  "placeholder_borrower": { "zh": "若无则留空", "en": "Leave empty if none", "jp": "ない場合は空白" },
+  "label_google": { "zh": "Google 搜索链接", "en": "Google Search Link", "jp": "Google 検索リンク" },
+  "btn_save": { "zh": "保存", "en": "Save", "jp": "保存" },
+  "btn_load": { "zh": "读取", "en": "Load", "jp": "読み込み" },
+  "btn_delete": { "zh": "删除", "en": "Delete", "jp": "削除" }
 }

@@ -31,22 +31,52 @@ async function loadLayout() {
   try {
     await import("./lang.js");
     window.initLang();
-
-    // === Theme toggle using SVG ===
+   // === Auth + Theme Controls ===
     const root = document.documentElement;
-    const icon = document.getElementById("themeIcon");
+    const role = localStorage.getItem("role");
+
+    // logout button (admin only)
+    const authControls = document.getElementById("authControls");
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (role === "admin" && authControls) authControls.style.display = "block";
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("role");
+        alert("您已登出 / You have logged out");
+        location.href = "library.html";
+      });
+    }
+
+    // theme toggle using SVG icons
+    const themeBtn  = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+
+    // default to system preference if no saved choice
+    if (!localStorage.getItem("theme")) {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      localStorage.setItem("theme", prefersDark ? "dark" : "light");
+    }
     let theme = localStorage.getItem("theme") || "light";
     root.dataset.theme = theme;
-    if (icon) icon.src = theme === "dark" ? "assets/icons/light-mode.svg" : "assets/icons/dark-mode.svg";
 
-    if (icon) {
-      icon.addEventListener("click", () => {
+    // set correct icon
+    function setThemeIcon(mode) {
+      if (!themeIcon) return;
+      themeIcon.src = mode === "dark"
+        ? "assets/icons/light-mode.svg"  // sun when currently dark
+        : "assets/icons/dark-mode.svg";  // moon when currently light
+    }
+    setThemeIcon(theme);
+
+    if (themeBtn) {
+      themeBtn.addEventListener("click", () => {
         theme = root.dataset.theme === "dark" ? "light" : "dark";
         root.dataset.theme = theme;
         localStorage.setItem("theme", theme);
-        icon.src = theme === "dark" ? "assets/icons/light-mode.svg" : "assets/icons/dark-mode.svg";
+        setThemeIcon(theme);
       });
     }
+
 
   } catch (e) {
     console.error("lang loader error", e);
@@ -54,4 +84,3 @@ async function loadLayout() {
 }
 
 window.addEventListener("DOMContentLoaded", loadLayout);
-

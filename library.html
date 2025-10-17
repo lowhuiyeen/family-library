@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>小金库图书馆</title>
+  <title data-i18n="title">小金库图书馆</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -22,52 +22,101 @@
 
   <div class="card" style="margin-top:14px;">
     <table>
-      <thead><tr><th>书号</th><th>书名 / 借阅人</th><th>作者</th><th>系列</th><th>ISBN</th><th>状态</th><th>操作</th></tr></thead>
-      <tbody id="tbody"><tr><td colspan="7" class="muted">加载中...</td></tr></tbody>
+      <thead>
+        <tr>
+          <th data-i18n="col_code">书号</th>
+          <th data-i18n="col_title">书名 / 借阅人</th>
+          <th data-i18n="col_author">作者</th>
+          <th data-i18n="col_series">系列</th>
+          <th data-i18n="col_isbn">ISBN</th>
+          <th data-i18n="col_status">状态</th>
+          <th data-i18n="col_action">操作</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="7" class="muted" data-i18n="loading">加载中...</td></tr></tbody>
     </table>
   </div>
 </main>
 
 <footer></footer>
 <script src="assets/load-layout.js"></script>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
   import { firebaseConfig } from "./assets/firebase-config.js";
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
-  const role = localStorage.getItem("role") || "guest";
-  const qEl=document.getElementById('q'), statusEl=document.getElementById('status'), tbody=document.getElementById('tbody'), addBtn=document.getElementById('addBtn');
-  if(role==="guest") addBtn.style.display="none"; else addBtn.onclick=()=>location.href='admin.html';
-  qEl.oninput=render; statusEl.onchange=render;
 
-  let books={};
-  onValue(ref(db,"Books书籍"),snap=>{ books=snap.val()||{}; render(); }, err=>{
-    tbody.innerHTML=`<tr><td colspan="7" class="muted">加载失败：${err?.message||''}</td></tr>`;
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const qEl = document.getElementById('q');
+  const statusEl = document.getElementById('status');
+  const tbody = document.getElementById('tbody');
+  const addBtn = document.getElementById('addBtn');
+  const role = localStorage.getItem("role") || "guest";
+
+  if (role === "guest") addBtn.style.display = "none";
+  else addBtn.onclick = () => location.href = 'admin.html';
+
+  qEl.oninput = render;
+  statusEl.onchange = render;
+
+  let books = {};
+
+  onValue(ref(db, "Books书籍"), (snap) => {
+    books = snap.val() || {};
+    render();
+  }, err => {
+    tbody.innerHTML = `<tr><td colspan="7" class="muted">加载失败：${err?.message || ''}</td></tr>`;
   });
 
-  function render(){
-    const q=(qEl.value||'').toLowerCase(), s=statusEl.value;
-    const rows=Object.entries(books).map(([id,b])=>({书号:id,...b}))
-      .filter(r=>{
-        const matchQ=!q||[r.书号,r.书名,r.作者].join(' ').toLowerCase().includes(q);
-        const matchS=!s||r.借阅状况===s;
+  // 🔁 re-render when language is switched via header flags
+  window.addEventListener("languagechange", render);
+
+  function render() {
+    const q = (qEl.value || '').toLowerCase();
+    const s = statusEl.value;
+
+    const rows = Object.entries(books)
+      .map(([id, b]) => ({ 书号: id, ...b }))
+      .filter(r => {
+        const matchQ = !q || [r.书号, r.书名, r.作者].join(' ').toLowerCase().includes(q);
+        const matchS = !s || r.借阅状况 === s; // values in DB stay Chinese
         return matchQ && matchS;
       });
-    tbody.innerHTML = rows.length? rows.map(r=>`
-      <tr>
-        <td>${r.书号}</td>
-        <td><strong>${r.书名||''}</strong><br><small class="muted">${r.借阅人?`借阅人：${r.借阅人}`:'可借阅'}</small></td>
-        <td>${r.作者||''}</td><td>${r.系列名||''}</td>
-        <td>${r['ISBN书号']||''}</td>
-        <td><span class="${r.借阅状况==='可借阅'?'badge ok':'badge warn'}">${r.借阅状况||''}</span></td>
-        <td>${role==='admin'
-            ? `<a href='admin.html?book=${r.书号}'>编辑</a> · <a href='borrow.html?book=${r.书号}'>借/还</a>`
-            : `<a href='borrow.html?book=${r.书号}'>查看状态</a>`
-          }</td>
-      </tr>`).join('')
-      : `<tr><td colspan="7" class="muted">无匹配结果</td></tr>`;
+
+    const lang = localStorage.getItem("lang") || "zh";
+    const T = {
+      zh: { avail: "可借阅", borrowed: "已被借阅", borrower: "借阅人", edit: "编辑", borrow: "借书" },
+      en: { avail: "Available", borrowed: "Borrowed", borrower: "Borrower", edit: "Edit", borrow: "Borrow" },
+      jp: { avail: "貸出可", borrowed: "貸出中", borrower: "借り手", edit: "編集", borrow: "借りる" }
+    }[lang];
+
+    tbody.innerHTML = rows.length ? rows.map(r => {
+      const isAvail = r.借阅状况 === "可借阅";
+      const statusText = isAvail ? T.avail : T.borrowed;             // ✅ translated status
+      const borrowerInfo = r.借阅人 ? `${T.borrower}：${r.借阅人}` : T.avail; // ✅ translated label
+
+      return `
+        <tr>
+          <td>${r.书号}</td>
+          <td><strong>${r.书名 || ''}</strong><br><small class="muted">${borrowerInfo}</small></td>
+          <td>${r.作者 || ''}</td>
+          <td>${r.系列名 || ''}</td>
+          <td>${r['ISBN书号'] || ''}</td>
+          <td><span class="${isAvail ? 'badge ok' : 'badge warn'}">${statusText}</span></td>
+          <td>
+            ${role === "admin"
+              ? `<a href='admin.html?book=${r.书号}'>${T.edit}</a> · <a href='borrow.html?book=${r.书号}'>${T.borrow}</a>`
+              : `<a href='login.html?redirect=${encodeURIComponent('borrow.html?book=' + r.书号)}' style="color:var(--accent)">${T.borrow}</a>`}
+          </td>
+        </tr>
+      `;
+    }).join('') : `<tr><td colspan="7" class="muted">无匹配结果</td></tr>`;
   }
 </script>
+
+window.addEventListener("languagechange", render);
+
 </body>
 </html>

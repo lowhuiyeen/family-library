@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title data-i18n="borrow_title">借书 / Borrow Book</title>
+  <title data-i18n="return_title">还书 / Return Book</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
 
 <main class="wrap">
   <div class="form-card">
-    <h2 data-i18n="borrow_heading">📖 借书</h2>
+    <h2 data-i18n="return_heading">📦 还书</h2>
     <div class="form-grid two">
       <div>
         <label data-i18n="label_code">书号</label>
@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="actions">
-      <button class="primary" id="borrowBtn" data-i18n="btn_borrow">借出</button>
+      <button class="primary" id="returnBtn" data-i18n="btn_return">归还</button>
     </div>
     <p id="msg" class="form-note"></p>
     <p class="form-note"><a href="library.html" data-i18n="back_library">← 返回馆藏</a></p>
@@ -35,7 +35,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-  import { getDatabase, ref, get, update, set } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+  import { getDatabase, ref, update, get, set } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
   import { firebaseConfig } from "./assets/firebase-config.js";
 
   const app = initializeApp(firebaseConfig);
@@ -55,26 +55,26 @@
     await set(r, list);
   }
 
-  async function borrow() {
+  async function returnBook() {
     const lang = localStorage.getItem("lang") || "zh";
     const DICT = {
-      zh: { fill: "⚠️ 请填写完整信息", ok: "✅ 已成功借出", err: "❌ 错误：" },
-      en: { fill: "⚠️ Please fill in all fields.", ok: "✅ Borrowed successfully!", err: "❌ Error: " },
-      jp: { fill: "⚠️ 全ての項目を入力してください。", ok: "✅ 借り出し完了！", err: "❌ エラー: " }
+      zh: { fill: "⚠️ 请填写完整信息", ok: "✅ 已成功归还", err: "❌ 错误：" },
+      en: { fill: "⚠️ Please fill in all fields.", ok: "✅ Returned successfully!", err: "❌ Error: " },
+      jp: { fill: "⚠️ 全ての項目を入力してください。", ok: "✅ 返却完了！", err: "❌ エラー: " }
     }[lang];
 
     try {
       const id = e("bookId").value.trim(), name = e("name").value.trim();
       if (!id || !name) return msg.textContent = DICT.fill;
-      await update(ref(db, `Books书籍/${id}`), { 借阅状况: "已被借阅", 借阅人: name });
-      await addRecord(id, "借书", name);
+      await update(ref(db, `Books书籍/${id}`), { 借阅状况: "可借阅", 借阅人: "" });
+      await addRecord(id, "还书", name);
       msg.textContent = DICT.ok;
     } catch (err) {
       msg.textContent = DICT.err + (err.message || err);
     }
   }
 
-  e("borrowBtn").onclick = borrow;
+  e("returnBtn").onclick = returnBook;
 </script>
 </body>
 </html>
