@@ -1,7 +1,7 @@
 {
   "title": { "zh": "小金库图书馆", "en": "Little Treasury Library", "jp": "小さな宝の図書館" },
   "hero_sub": { "zh": "家庭专属图书管理系统", "en": "Private Family Library System", "jp": "家族専用の図書管理システム" },
-  "login_btn": { "zh": "登录 / Login", "en": "Login", "jp": "ログイン" },
+  "login_btn": { "zh": "登录", "en": "Login", "jp": "ログイン" },
 
   "add_book": { "zh": "新增 / 修改书籍", "en": "Add / Edit Book", "jp": "本を追加 / 編集" },
   "status_all": { "zh": "全部状态", "en": "All Status", "jp": "すべての状態" },
