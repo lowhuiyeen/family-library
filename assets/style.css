@@ -11,15 +11,15 @@
 }
 
 [data-theme="dark"] {
-  /* Dark Theme — improved contrast */
-  --bg: #121826;              /* lighter than #0b1020 */
-  --card: #1a2338;            /* readable but still dark */
-  --ink: #f2f4ff;             /* brighter main text */
-  --muted: #b8bfdc;           /* softer secondary text */
-  --accent: #70b8ff;          /* bright clickable color */
+  --bg: #121826;           /* slightly brighter background */
+  --card: #1b2238;
+  --ink: #f6f7ff;          /* brighter main text */
+  --muted: #c8cee4;        /* softer gray but readable */
+  --accent: #76b7ff;       /* bright clickable blue */
   --ok: #44e260;
   --warn: #ffc14d;
 }
+
 
 
 
@@ -127,32 +127,33 @@ button.danger { background: #3a1420; border-color: #7a2740; }
 /* ---------- CARD / TABLE ---------- */
 .card {
   background: var(--card);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  padding: 0; /* remove inner padding that breaks alignment */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  overflow-x: auto;
+  width: 100%;
 }
 
-
-table {
+/* make table scroll horizontally on small screens */
+.card table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 700px;
+  min-width: 700px; /* auto scroll if screen < 700px */
+  background: var(--card);
 }
 
-th, td {
-  padding: 12px;
-  border-bottom: 1px solid #22305f;
+table th, table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   text-align: left;
+  word-wrap: break-word;
 }
 
-th {
-  color: var(--muted);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-size: 0.9em;
+tbody tr:hover {
+  background: rgba(61, 124, 255, 0.08);
 }
+
 
 .badge.ok { color: var(--ok); font-weight: 600; }
 .badge.warn { color: var(--warn); font-weight: 600; }
