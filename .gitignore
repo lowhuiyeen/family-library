@@ -2,8 +2,6 @@ node_modules/
 dist/
 .env
 
-# Firebase local config (keep private)
-assets/firebase-config.js
 
 # IDE
 .vscode/
