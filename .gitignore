@@ -1,0 +1,34 @@
+# =========================================
+# 🧹 GITIGNORE — Family Library Website
+# =========================================
+
+# Node / Netlify build files
+node_modules/
+.netlify/
+dist/
+build/
+functions/
+.DS_Store
+Thumbs.db
+
+# System / IDE files
+*.code-workspace
+.vscode/
+.idea/
+*.log
+*.tmp
+
+# Environment and secrets
+.env
+.env.local
+.env.development.local
+.env.production.local
+
+# Archives or uploads
+*.zip
+*.tar
+*.gz
+
+# Optional local test folders
+test/
+sandbox/

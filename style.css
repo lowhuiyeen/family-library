@@ -1,0 +1,79 @@
+:root {
+  --brand-yellow: #FAB400;
+  --brand-blue: #1858B7;
+  --brand-brown: #786132;
+  --brand-gold: #D7B564;
+  --brand-peach: #FCD395;
+  --brand-black: #131211;
+  --color-bg: #fffaf3;
+  --color-text: var(--brand-black);
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.hero {
+  padding: 80px 20px;
+  background: linear-gradient(180deg, var(--brand-peach), var(--brand-gold));
+}
+
+.hero img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid white;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.hero h1 {
+  font-size: 2rem;
+  margin-top: 16px;
+  color: var(--brand-blue);
+}
+
+.hero p {
+  margin: 8px auto 24px;
+  max-width: 600px;
+}
+
+.btn-primary, .btn-accent {
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  margin: 5px;
+}
+
+.btn-primary {
+  background: var(--brand-yellow);
+  color: var(--brand-black);
+  box-shadow: 0 4px 10px rgba(250,180,0,0.3);
+}
+.btn-primary:hover {
+  background: var(--brand-blue);
+  color: #fff;
+}
+
+.btn-accent {
+  background: var(--brand-blue);
+  color: #fff;
+}
+.btn-accent:hover {
+  background: var(--brand-yellow);
+  color: var(--brand-black);
+}
+
+footer {
+  padding: 24px;
+  font-size: 0.9rem;
+  color: var(--brand-brown);
+  border-top: 1px solid #e7e2d6;
+  margin-top: 40px;
+}
